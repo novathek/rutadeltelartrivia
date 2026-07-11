@@ -216,10 +216,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
 /* ── Mascot / feedback container ───────────── */
 .condor-container {
   display:none;
-  position:absolute;
-  bottom:80px;
-  left:16px;
-  right:16px;
+  position:relative; margin-top:20px; width:100%;
   z-index:999;
   align-items:flex-end;
   gap:10px;
@@ -368,7 +365,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   .nav-row { gap:14px; margin-top:10px; }
   .nav-btn { padding:18px 26px; font-size:20px; }
   .nav-next { font-size:22px; }
-  .condor-container { bottom:100px; left:22px; right:22px; gap:16px; }
+  .condor-container { margin-top:30px; gap:16px; }
   .speech-bubble { font-size:20px; padding:22px 28px; border-radius:28px; border-width:4px; }
   .speech-bubble::before { border-width:18px 18px 18px 0; left:-22px; bottom:28px; }
   .speech-bubble::after { border-width:14px 14px 14px 0; left:-14px; bottom:32px; }
