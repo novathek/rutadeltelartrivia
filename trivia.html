@@ -1,26 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Trivia Ruta del Telar</title>
   <meta name="description" content="Trivia sobre la Ruta del Telar - tradición textil de Catamarca"/>
 <style>
-@font-face {
-  font-family: 'MariDavid';
-  src: url('assets app/MARI&DAVID.ttf') format('truetype');
-  font-weight: 400;
-}
-@font-face {
-  font-family: 'MariDavid';
-  src: url('assets app/MARI&DAVID BOLD.ttf') format('truetype');
-  font-weight: 700;
-}
-@font-face {
-  font-family: 'MariDavid';
-  src: url('assets app/MARI&DAVID EXTRABOLD.ttf') format('truetype');
-  font-weight: 900;
-}
+
+
+
 
 :root {
   --color-bg: #e8d5b8;
@@ -42,7 +31,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   width:100%;
   min-height:100dvh;
   position:relative;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
   overflow-x:hidden;
   display:flex;
   flex-direction:column;
@@ -97,7 +86,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
 .trivia-logo-img {
   max-width:180px;
   width:52%;
-  margin:-4px 0 0 0;
+  margin:18px 0 0 0;
   animation:logoPop 0.8s cubic-bezier(.34,1.56,.64,1) 0.3s both, logoWiggle 4s ease-in-out 1s infinite;
   filter: drop-shadow(0 3px 8px rgba(90,68,48,0.2));
 }
@@ -115,7 +104,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   padding:5px 13px;
   white-space:nowrap;
   flex-shrink:0;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
   letter-spacing:0.5px;
   animation:labelPop 0.5s cubic-bezier(.34,1.56,.64,1);
 }
@@ -148,7 +137,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   font-weight:700;
   color:var(--color-text-dark);
   line-height:1.4;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
 }
 
 /* ── Options ────────────────────────────────── */
@@ -213,7 +202,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   justify-content:center;
   flex-shrink:0;
   transition:background 0.25s, transform 0.3s;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
 }
 .option-btn.correct .option-letter{background: var(--color-bordo); transform:rotate(360deg) scale(1.15);}
 .option-btn.wrong .option-letter{background:#c0392b;}
@@ -221,7 +210,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   font-size:15px;
   font-weight:700;
   color:var(--color-text-dark);
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
 }
 
 /* ── Mascot / feedback container ───────────── */
@@ -252,7 +241,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   line-height:1.4;
   border:2.5px solid var(--bubble-color, var(--color-bordo));
   transition:border-color 0.2s;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
 }
 .speech-bubble::after{
   content:'';
@@ -261,7 +250,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   left:-9px;
   border-width:9px 9px 9px 0;
   border-style:solid;
-  border-color:transparent var(--color-sand) transparent transparent;
+  display:none;
   display:block;
   width:0;
   z-index:2;
@@ -273,7 +262,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   left:-13px;
   border-width:11px 11px 11px 0;
   border-style:solid;
-  border-color:transparent var(--bubble-color, var(--color-bordo)) transparent transparent;
+  display:none;
   display:block;
   width:0;
   z-index:1;
@@ -294,7 +283,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   justify-content:center;
   gap:6px;
   flex:1;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
   transition:transform 0.15s, filter 0.15s;
   letter-spacing:0.5px;
 }
@@ -334,11 +323,11 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
 @keyframes scoreEntrance{from{opacity:0;transform:scale(0.7) rotate(-4deg);}to{opacity:1;transform:scale(1) rotate(0);}}
 .score-emoji{font-size:52px;animation:emojiSpin 0.8s cubic-bezier(.34,1.56,.64,1) 0.3s both;}
 @keyframes emojiSpin{from{transform:scale(0) rotate(-180deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
-.score-title{font-size:22px;font-weight:900;color:var(--color-text-dark);font-family:'MariDavid', Georgia, serif;}
-.score-sub{font-size:14px;font-weight:700;color:var(--color-bordo);font-family:'MariDavid', Georgia, serif;}
-.score-num{font-size:44px;font-weight:900;color:var(--color-bordo);animation:numCount 0.6s cubic-bezier(.34,1.56,.64,1) 0.5s both;font-family:'MariDavid', Georgia, serif;}
+.score-title{font-size:22px;font-weight:900;color:var(--color-text-dark);font-family:'Open Sans', Georgia, serif;}
+.score-sub{font-size:14px;font-weight:700;color:var(--color-bordo);font-family:'Open Sans', Georgia, serif;}
+.score-num{font-size:44px;font-weight:900;color:var(--color-bordo);animation:numCount 0.6s cubic-bezier(.34,1.56,.64,1) 0.5s both;font-family:'Open Sans', Georgia, serif;}
 @keyframes numCount{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
-.score-comment{font-size:13px;font-weight:700;color:var(--color-text);font-family:'MariDavid', Georgia, serif;}
+.score-comment{font-size:13px;font-weight:700;color:var(--color-text);font-family:'Open Sans', Georgia, serif;}
 .restart-btn {
   background: var(--color-bordo);
   color:white;
@@ -348,7 +337,7 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   font-size:15px;
   font-weight:700;
   cursor:pointer;
-  font-family:'MariDavid', Georgia, serif;
+  font-family:'Open Sans', Georgia, serif;
   margin-top:6px;
   animation:restartPulse 2.5s ease-in-out infinite;
   transition:transform 0.15s;
@@ -480,6 +469,9 @@ html,body{min-height:100dvh;background:var(--color-bg);margin:0;padding:0;overfl
   .score-comment { font-size:20px; }
   .restart-btn { padding:14px 44px; font-size:18px; }
 }
+  .speech-bubble::before, .speech-bubble::after {
+    display: none !important;
+  }
 </style>
 </head>
 <body>
@@ -611,7 +603,7 @@ function sndQuestion(){
 }
 
 // ─────────────────────────────────────────────────────────────────
-const questions=[
+const allQuestions=[
   {
     q: "¿Qué localidad de la Ruta del Telar es conocida históricamente como la \"Cuna del Poncho\"?",
     opts: ["Hualfín", "Belén", "Puerta de San José"],
@@ -703,6 +695,26 @@ const questions=[
     exp: "Laguna Blanca es una reserva de la Biósfera y uno de los lugares más importantes de la Ruta del Telar, hábitat natural de la vicuña."
   }
 ];
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const questions = shuffleArray([...allQuestions]).slice(0, 5).map(q => {
+  let optsObj = q.opts.map((text, idx) => ({ text, isCorrect: idx === q.correct }));
+  optsObj = shuffleArray(optsObj);
+  let newCorrect = optsObj.findIndex(o => o.isCorrect);
+  return {
+    q: q.q,
+    opts: optsObj.map(o => o.text),
+    correct: newCorrect,
+    exp: q.exp
+  };
+});
 
 let current=0,score=0,answered=false;
 const confettiColors=['#7a1c1c','#a08060','#d4bc96','#7d6545','#c0392b','#e8d5b8','#9b2525'];
