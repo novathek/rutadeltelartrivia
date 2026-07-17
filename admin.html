@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trivia Ruta del Telar — Estadísticas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --green:#22c55e; --green-dark:#16a34a; --green-light:#86efac;
+      --bg:#0a1608; --card:rgba(255,255,255,0.04); --card-border:rgba(34,197,94,0.2);
+      --text:#f0fdf4; --muted:rgba(255,255,255,0.45);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#0a1608 0%,#1a2e10 50%,#0a1608 100%);min-height:100vh;color:var(--text);}
+
+    /* ── Header ── */
+    .header{background:rgba(0,0,0,0.5);backdrop-filter:blur(20px);border-bottom:1px solid var(--card-border);padding:18px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .header-left{display:flex;align-items:center;gap:16px;}
+    .header-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.4);}50%{box-shadow:0 0 0 10px rgba(34,197,94,0);}}
+    .header h1{font-size:20px;font-weight:900;color:white;}
+    .header h1 span{color:var(--green);}
+    .header-sub{font-size:12px;color:var(--green-light);margin-top:2px;}
+    .update-badge{background:rgba(34,197,94,0.12);border:1px solid var(--card-border);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--green);font-weight:700;}
+
+    /* ── Main ── */
+    .main{padding:32px 40px;max-width:1400px;margin:0 auto;}
+
+    /* ── Config ── */
+    .config{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:22px 28px;margin-bottom:28px;backdrop-filter:blur(10px);}
+    .config-label{font-size:12px;font-weight:800;color:var(--green-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+    .config-row{display:flex;gap:10px;}
+    .config-input{flex:1;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 18px;color:white;font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;}
+    .config-input:focus{border-color:var(--green);}
+    .config-input::placeholder{color:rgba(255,255,255,0.25);}
+    .btn-load{background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;border-radius:12px;padding:12px 28px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;transition:transform 0.15s,filter 0.15s;}
+    .btn-load:hover{transform:scale(1.03);filter:brightness(1.1);}
+    .btn-load:active{transform:scale(0.97);}
+    .status{margin-top:10px;font-size:13px;font-weight:700;padding:10px 16px;border-radius:10px;display:none;}
+    .status.loading{display:block;background:rgba(59,130,246,0.12);color:#60a5fa;}
+    .status.error{display:block;background:rgba(239,68,68,0.12);color:#f87171;}
+    .status.success{display:block;background:rgba(34,197,94,0.12);color:var(--green);}
+
+    /* ── Cards ── */
+    .cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px;}
+    .card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:22px;backdrop-filter:blur(10px);transition:transform 0.2s,border-color 0.2s;}
+    .card:hover{transform:translateY(-3px);border-color:rgba(34,197,94,0.4);}
+    .card-icon{font-size:28px;margin-bottom:10px;display:block;}
+    .card-value{font-size:34px;font-weight:900;color:var(--green);line-height:1;margin-bottom:4px;}
+    .card-label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .card-sub{font-size:11px;color:var(--green-light);margin-top:4px;}
+
+    /* ── Charts ── */
+    .charts-2col{display:grid;grid-template-columns:3fr 2fr;gap:18px;margin-bottom:28px;}
+    .chart-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:22px;backdrop-filter:blur(10px);}
+    .chart-card.full{margin-bottom:28px;}
+    .chart-title{font-size:14px;font-weight:800;color:white;margin-bottom:18px;}
+    .chart-wrap{position:relative;height:220px;}
+    .chart-wrap.short{height:180px;}
+
+    /* ── Section title ── */
+    .section-title{font-size:16px;font-weight:900;color:white;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+    .section-title::before{content:'';width:4px;height:18px;background:var(--green);border-radius:2px;flex-shrink:0;}
+    .section-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+
+    /* ── Ranking ── */
+    .ranking-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:22px;backdrop-filter:blur(10px);margin-bottom:28px;}
+    .ranking-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+    .ranking-item:last-child{border-bottom:none;}
+    .rank-badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;}
+    .rank-badge.gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;}
+    .rank-badge.silver{background:linear-gradient(135deg,#94a3b8,#64748b);color:white;}
+    .rank-badge.bronze{background:linear-gradient(135deg,#cd7f32,#a0522d);color:white;}
+    .rank-badge.normal{background:rgba(255,255,255,0.08);color:var(--muted);}
+    .rank-text{flex:1;font-size:13px;font-weight:700;color:white;line-height:1.3;}
+    .progress-bar{width:110px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex-shrink:0;}
+    .progress-fill{height:100%;border-radius:3px;transition:width 0.8s ease;}
+    .rank-stats{text-align:right;flex-shrink:0;min-width:80px;}
+    .rank-pct{font-size:18px;font-weight:900;}
+    .rank-count{font-size:11px;color:var(--muted);}
+
+    /* ── History table ── */
+    .history-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:22px;backdrop-filter:blur(10px);margin-bottom:28px;overflow:hidden;}
+    .table-wrap{overflow-x:auto;margin-top:14px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    thead th{background:rgba(34,197,94,0.08);color:var(--green);font-weight:800;padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--card-border);}
+    tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.15s;}
+    tbody tr:hover{background:rgba(255,255,255,0.025);}
+    tbody td{padding:10px 14px;color:rgba(255,255,255,0.75);font-weight:600;}
+    .score-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:800;}
+    .s5{background:rgba(245,158,11,0.2);color:#f59e0b;}
+    .s4{background:rgba(34,197,94,0.2);color:#22c55e;}
+    .s3{background:rgba(34,197,94,0.1);color:#86efac;}
+    .s2{background:rgba(234,179,8,0.15);color:#ca8a04;}
+    .s1{background:rgba(239,68,68,0.15);color:#f87171;}
+    .s0{background:rgba(239,68,68,0.2);color:#ef4444;}
+
+    /* ── Export ── */
+    .export-section{display:flex;justify-content:center;padding-bottom:48px;}
+    .btn-export{background:linear-gradient(135deg,#166534,#22c55e);color:white;border:none;border-radius:60px;padding:18px 52px;font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;cursor:pointer;letter-spacing:0.5px;transition:transform 0.15s,filter 0.15s,box-shadow 0.15s;box-shadow:0 8px 32px rgba(34,197,94,0.3);display:flex;align-items:center;gap:12px;}
+    .btn-export:hover{transform:scale(1.04);filter:brightness(1.1);box-shadow:0 12px 48px rgba(34,197,94,0.45);}
+    .btn-export:active{transform:scale(0.97);}
+    .btn-export:disabled{opacity:0.35;pointer-events:none;}
+
+    /* ── Empty state ── */
+    .empty{text-align:center;padding:48px 20px;color:rgba(255,255,255,0.25);}
+    .empty-icon{font-size:44px;margin-bottom:12px;}
+    .empty-text{font-size:15px;font-weight:700;}
+
+    @media(max-width:900px){
+      .main{padding:20px;}
+      .cards-row{grid-template-columns:repeat(2,1fr);}
+      .charts-2col{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="header-icon">🏆</div>
+    <div>
+      <h1>Trivia Ruta del Telar — <span>Estadísticas</span></h1>
+      <div class="header-sub">Panel de administración</div>
+    </div>
+  </div>
+  <div class="update-badge" id="lastUpdate">Sin datos cargados</div>
+</header>
+
+<main class="main">
+
+  <!-- Config -->
+  <div class="config">
+    <div class="config-label">🔗 URL del Apps Script (Google)</div>
+    <div class="config-row">
+      <input class="config-input" id="scriptUrl" type="text"
+        placeholder="https://script.google.com/macros/s/XXXXXX/exec" />
+      <button class="btn-load" onclick="loadData()">⚡ Cargar Datos</button>
+    </div>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards-row">
+    <div class="card">
+      <span class="card-icon">🎮</span>
+      <div class="card-value" id="cTotal">—</div>
+      <div class="card-label">Partidas Jugadas</div>
+      <div class="card-sub" id="cTotalSub">Cargá los datos para ver</div>
+    </div>
+    <div class="card">
+      <span class="card-icon">⭐</span>
+      <div class="card-value" id="cPromedio">—</div>
+      <div class="card-label">Promedio de Puntaje</div>
+      <div class="card-sub">sobre 5 preguntas</div>
+    </div>
+    <div class="card">
+      <span class="card-icon">✅</span>
+      <div class="card-value" id="cAcierto">—</div>
+      <div class="card-label">Tasa de Acierto</div>
+      <div class="card-sub">respuestas correctas totales</div>
+    </div>
+    <div class="card">
+      <span class="card-icon">📅</span>
+      <div class="card-value" id="cUltima">—</div>
+      <div class="card-label">Última Partida</div>
+      <div class="card-sub" id="cUltimaSub">fecha y hora</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="charts-2col">
+    <div class="chart-card">
+      <div class="chart-title">📈 Partidas por Día (últimos 30 días)</div>
+      <div class="chart-wrap"><canvas id="chartDias"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🎯 Distribución de Puntajes</div>
+      <div class="chart-wrap"><canvas id="chartPuntajes"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart horas -->
+  <div class="chart-card full">
+    <div class="chart-title">🕐 Actividad por Hora del Día</div>
+    <div class="chart-wrap short"><canvas id="chartHoras"></canvas></div>
+  </div>
+
+  <!-- Ranking -->
+  <div class="ranking-card">
+    <div class="section-title">Ranking de Preguntas</div>
+    <div class="section-sub">Ordenadas de mayor a menor tasa de acierto</div>
+    <div id="rankingList">
+      <div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Cargá los datos para ver el ranking</div></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="history-card">
+    <div class="section-title">Historial Completo de Partidas</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Hora</th><th>Tablet</th><th>Puntaje</th><th>% Acierto</th><th>Duración</th></tr></thead>
+        <tbody id="historialBody">
+          <tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.25);padding:40px">Cargá los datos para ver el historial</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Export -->
+  <div class="export-section">
+    <button class="btn-export" id="btnExport" onclick="exportExcel()" disabled>
+      📥 Exportar a Excel (.xlsx)
+    </button>
+  </div>
+
+</main>
+
+<script>
+Chart.defaults.color='rgba(255,255,255,0.4)';
+Chart.defaults.borderColor='rgba(255,255,255,0.08)';
+
+let allData={partidas:[],preguntas:[]};
+let charts={};
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('rdtrivia_admin_url');
+  if(saved) document.getElementById('scriptUrl').value=saved;
+});
+
+function setStatus(type,msg){
+  const el=document.getElementById('statusMsg');
+  el.className='status '+type;
+  el.textContent=msg;
+}
+
+function loadData(){
+  const url=document.getElementById('scriptUrl').value.trim();
+  if(!url){setStatus('error','❌ Ingresá la URL del Apps Script primero.');return;}
+  localStorage.setItem('rdtrivia_admin_url',url);
+  setStatus('loading','⏳ Cargando datos desde Google Sheets...');
+  const old=document.getElementById('_jsonpScript');
+  if(old)old.remove();
+  window._triviaStatsCallback=function(data){
+    allData=data;
+    setStatus('success',`✅ ${data.partidas.length} partidas cargadas correctamente.`);
+    document.getElementById('lastUpdate').textContent=`Actualizado: ${new Date().toLocaleTimeString('es-AR')}`;
+    document.getElementById('btnExport').disabled=data.partidas.length===0;
+    renderDashboard();
+  };
+  const script=document.createElement('script');
+  script.id='_jsonpScript';
+  script.src=url+'?callback=_triviaStatsCallback';
+  script.onerror=()=>setStatus('error','❌ No se pudo conectar. Verificá la URL o tu conexión a internet.');
+  document.head.appendChild(script);
+  setTimeout(()=>{if(document.getElementById('statusMsg').classList.contains('loading'))setStatus('error','❌ Tiempo agotado. Verificá la URL del Apps Script.');},10000);
+}
+
+function renderDashboard(){
+  const{partidas,preguntas}=allData;
+  renderCards(partidas,preguntas);
+  renderChartDias(partidas);
+  renderChartPuntajes(partidas);
+  renderChartHoras(partidas);
+  renderRanking(preguntas);
+  renderHistorial(partidas);
+}
+
+function renderCards(partidas,preguntas){
+  const total=partidas.length;
+  const totalScore=partidas.reduce((s,p)=>s+(Number(p['Puntaje'])||0),0);
+  const totalAns=preguntas.length;
+  const correct=preguntas.filter(p=>p['Respondida Correctamente']==='SI').length;
+  document.getElementById('cTotal').textContent=total;
+  document.getElementById('cTotalSub').textContent=total===0?'Sin partidas aún':`desde ${(partidas[0]||{})['Fecha']||'—'}`;
+  document.getElementById('cPromedio').textContent=total>0?(totalScore/total).toFixed(1):'—';
+  document.getElementById('cAcierto').textContent=totalAns>0?Math.round((correct/totalAns)*100)+'%':'—';
+  if(partidas.length>0){
+    const last=partidas[partidas.length-1];
+    document.getElementById('cUltima').textContent=last['Hora']||'—';
+    document.getElementById('cUltimaSub').textContent=last['Fecha']||'—';
+  }
+}
+
+function renderChartDias(partidas){
+  const last30={};
+  const today=new Date();
+  for(let i=29;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const k=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+    last30[k]=0;
+  }
+  partidas.forEach(p=>{const k=(p['Fecha']||'').slice(0,5);if(last30.hasOwnProperty(k))last30[k]++;});
+  if(charts.dias)charts.dias.destroy();
+  charts.dias=new Chart(document.getElementById('chartDias'),{
+    type:'line',
+    data:{labels:Object.keys(last30),datasets:[{label:'Partidas',data:Object.values(last30),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#22c55e',pointRadius:3,pointHoverRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'rgba(255,255,255,0.4)',maxTicksLimit:10,font:{family:'Nunito',size:11}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'rgba(255,255,255,0.4)',stepSize:1,font:{family:'Nunito',size:11}},beginAtZero:true}}}
+  });
+}
+
+function renderChartPuntajes(partidas){
+  const dist=[0,0,0,0,0,0];
+  partidas.forEach(p=>{const s=Number(p['Puntaje'])||0;if(s>=0&&s<=5)dist[s]++;});
+  if(charts.puntajes)charts.puntajes.destroy();
+  charts.puntajes=new Chart(document.getElementById('chartPuntajes'),{
+    type:'bar',
+    data:{labels:['0','1','2','3','4','5'],datasets:[{data:dist,backgroundColor:['rgba(239,68,68,0.7)','rgba(239,68,68,0.5)','rgba(234,179,8,0.6)','rgba(34,197,94,0.4)','rgba(34,197,94,0.65)','rgba(245,158,11,0.85)'],borderRadius:8}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.4)',font:{family:'Nunito'}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'rgba(255,255,255,0.4)',stepSize:1,font:{family:'Nunito'}},beginAtZero:true}}}
+  });
+}
+
+function renderChartHoras(partidas){
+  const hours=new Array(24).fill(0);
+  partidas.forEach(p=>{const h=parseInt((p['Hora']||'0').split(':')[0]);if(h>=0&&h<24)hours[h]++;});
+  const labels=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}h`);
+  if(charts.horas)charts.horas.destroy();
+  charts.horas=new Chart(document.getElementById('chartHoras'),{
+    type:'bar',
+    data:{labels,datasets:[{data:hours,backgroundColor:hours.map(v=>v>0?'rgba(34,197,94,0.65)':'rgba(255,255,255,0.05)'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.35)',font:{family:'Nunito',size:10}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'rgba(255,255,255,0.4)',stepSize:1,font:{family:'Nunito'}},beginAtZero:true}}}
+  });
+}
+
+function renderRanking(preguntas){
+  const qStats={};
+  preguntas.forEach(p=>{
+    const t=p['Pregunta']||'Sin texto';
+    if(!qStats[t])qStats[t]={total:0,correct:0};
+    qStats[t].total++;
+    if(p['Respondida Correctamente']==='SI')qStats[t].correct++;
+  });
+  const ranking=Object.entries(qStats).map(([text,s])=>({text,total:s.total,correct:s.correct,pct:s.total>0?Math.round((s.correct/s.total)*100):0})).sort((a,b)=>b.pct-a.pct);
+  const container=document.getElementById('rankingList');
+  if(!ranking.length){container.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Sin datos de preguntas aún</div></div>';return;}
+  container.innerHTML=ranking.map((item,i)=>{
+    const posClass=i===0?'gold':i===1?'silver':i===2?'bronze':'normal';
+    const color=item.pct>=70?'#22c55e':item.pct>=40?'#f59e0b':'#ef4444';
+    return `<div class="ranking-item">
+      <div class="rank-badge ${posClass}">${i+1}</div>
+      <div class="rank-text">${escHtml(item.text)}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${item.pct}%;background:${color}"></div></div>
+      <div class="rank-stats">
+        <div class="rank-pct" style="color:${color}">${item.pct}%</div>
+        <div class="rank-count">${item.correct}/${item.total}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistorial(partidas){
+  const tbody=document.getElementById('historialBody');
+  if(!partidas.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.25);padding:40px">Sin partidas aún</td></tr>';return;}
+  tbody.innerHTML=[...partidas].reverse().map((p,i)=>{
+    const sc=Number(p['Puntaje'])||0;
+    const tot=Number(p['Total'])||5;
+    const pct=Number(p['Porcentaje %'])||Math.round((sc/tot)*100);
+    const dur=p['Duración (seg)']&&p['Duración (seg)']!=='0'?`${p['Duración (seg)']}s`:'—';
+    const tab=(p['Tablet ID']||'?').replace('tablet_','').slice(0,6);
+    return `<tr>
+      <td style="color:rgba(255,255,255,0.3)">${partidas.length-i}</td>
+      <td>${p['Fecha']||'—'}</td>
+      <td>${p['Hora']||'—'}</td>
+      <td><code style="background:rgba(255,255,255,0.07);padding:2px 8px;border-radius:6px;font-size:11px">${tab}</code></td>
+      <td><span class="score-badge s${sc}">${sc} / ${tot}</span></td>
+      <td>${pct}%</td>
+      <td style="color:rgba(255,255,255,0.45)">${dur}</td>
+    </tr>`;
+  }).join('');
+}
+
+function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function exportExcel(){
+  if(!allData.partidas.length){alert('No hay datos para exportar.');return;}
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(allData.partidas),'Partidas');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(allData.preguntas),'Detalle Preguntas');
+  const qStats={};
+  allData.preguntas.forEach(p=>{
+    const t=p['Pregunta']||'';
+    if(!qStats[t])qStats[t]={total:0,correct:0};
+    qStats[t].total++;
+    if(p['Respondida Correctamente']==='SI')qStats[t].correct++;
+  });
+  const rankingData=Object.entries(qStats).map(([text,s])=>({
+    'Pregunta':text,'Veces mostrada':s.total,
+    'Respuestas correctas':s.correct,'Respuestas incorrectas':s.total-s.correct,
+    '% Acierto':s.total>0?Math.round((s.correct/s.total)*100):0
+  })).sort((a,b)=>b['% Acierto']-a['% Acierto']);
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rankingData),'Ranking Preguntas');
+  XLSX.writeFile(wb,`trivia_rdt_stats_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+</script>
+</body>
+</html>
