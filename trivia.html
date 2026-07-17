@@ -3,7 +3,7 @@
 <head>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=1080, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Trivia Ruta del Telar</title>
   <meta name="description" content="Trivia sobre la Ruta del Telar - tradición textil de Catamarca"/>
 <style>
@@ -25,10 +25,17 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{
+html{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--color-bg);
+}
+body{
   width:1080px;
   height:1920px;
   overflow:hidden;
+  transform-origin: top left;
   background:var(--color-bg);
 }
 
@@ -796,4 +803,19 @@ function restart(){
 render();
 </script>
 </body>
+
+<script>
+// ── Escala proporcional a cualquier pantalla ──────────────
+// Se aplica a body para no interferir con animaciones de #app
+function scaleApp() {
+  const scaleX = window.innerWidth  / 1080;
+  const scaleY = window.innerHeight / 1920;
+  const scale  = Math.min(scaleX, scaleY);
+  document.body.style.transform   = `scale(${scale})`;
+  document.body.style.marginLeft  = ((window.innerWidth  - 1080 * scale) / 2) + 'px';
+  document.body.style.marginTop   = ((window.innerHeight - 1920 * scale) / 2) + 'px';
+}
+scaleApp();
+window.addEventListener('resize', scaleApp);
+</script>
 </html>
